@@ -3,7 +3,6 @@ package jwt
 import (
 	"crypto/rsa"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -439,7 +438,6 @@ func (mw *GinJWTMiddleware) CheckToken(c *gin.Context) (string, string, bool) {
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
-	fmt.Println(claims)
 	origIat := int64(claims["orig_iat"].(float64))
 
 	if origIat < mw.TimeFunc().Add(-mw.MaxRefresh).Unix() {

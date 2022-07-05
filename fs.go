@@ -126,7 +126,7 @@ func CopyFile(dstName, srcName string) (written int64, err error) {
 }
 
 func MkdirWithCreatePath(fullpath string) error {
-	dirArray := strings.Split(fullpath, "/")
+	dirArray := strings.Split(fullpath, string(filepath.Separator))
 	if len(dirArray) < 1 {
 		return errors.New("fullpath mistake")
 	} else if len(dirArray) == 1 {
@@ -138,7 +138,7 @@ func MkdirWithCreatePath(fullpath string) error {
 	var err error = nil
 	for i := 0; i < len(dirArray); i++ {
 		dir := dirArray[i]
-		path = path + "/" + dir
+		path = path + string(filepath.Separator) + dir
 		p := SubString(path, 1, len(path)-1)
 		if !PathExist(p) {
 			err = Mkdir(p)
