@@ -426,7 +426,14 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	})
 }
 func (mw *GinJWTMiddleware) RefreshToken(c *gin.Context) (string, string, string, string, bool) {
-	token, _ := mw.parseToken(c)
+	if err := mw.MiddlewareInit(); err != nil {
+		return "", "", "", "", false
+	}
+	token, err := mw.parseToken(c)
+
+	if err != nil {
+		return "", "", "", "", false
+	}
 	claims := token.Claims.(jwt.MapClaims)
 
 	origIat := int64(claims["orig_iat"].(float64))
