@@ -425,7 +425,37 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 		"expire": expire.Format(time.RFC3339),
 	})
 }
+func (mw *GinJWTMiddleware) RefreshToken(c *gin.Context) (string, string, bool) {
+	token, _ := mw.parseToken(c)
+	claims := token.Claims.(jwt.MapClaims)
 
+	origIat := int64(claims["orig_iat"].(float64))
+
+	if origIat < mw.TimeFunc().Add(-mw.MaxRefresh).Unix() {
+		// mw.unauthorized(c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(ErrExpiredToken, c))
+		return "", "", false
+	}
+
+	// Create the token
+	newToken := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
+	newClaims := newToken.Claims.(jwt.MapClaims)
+
+	for key := range claims {
+		newClaims[key] = claims[key]
+	}
+
+	expire := mw.TimeFunc().Add(mw.Timeout)
+	newClaims["id"] = claims["id"]
+	newClaims["fzid"] = claims["fzid"]
+	newClaims["exp"] = expire.Unix()
+	newClaims["orig_iat"] = origIat
+	tokenString, err := mw.SignedString(newToken)
+
+	if err != nil {
+		return "", "", false
+	}
+	return tokenString, expire.Format(time.RFC3339), true
+}
 //CheckToken 在路由中未定义检验token
 func (mw *GinJWTMiddleware) CheckToken(c *gin.Context) (string, string, bool) {
 	if err := mw.MiddlewareInit(); err != nil {
