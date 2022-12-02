@@ -567,7 +567,15 @@ func (mw *GinJWTMiddleware) jwtFromParam(c *gin.Context, key string) (string, er
 
 	return token, nil
 }
+func (mw *GinJWTMiddleware) jwtFromWebSocket(c *gin.Context, key string) (string, error) {
+	authHeader := c.Request.Header.Get(key)
 
+	if authHeader == "" {
+		return "", ErrEmptyAuthHeader
+	}
+
+	return authHeader, nil
+}
 func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	var token string
 	var err error
@@ -592,6 +600,9 @@ func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 			// logger.Info("cookie", token)
 		case "param":
 			token, err = mw.jwtFromParam(c, v)
+			// logger.Info("param", token)
+		case "websocket":
+			token, err = mw.jwtFromWebSocket(c, v)
 			// logger.Info("param", token)
 		}
 	}
