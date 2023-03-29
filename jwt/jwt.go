@@ -234,7 +234,7 @@ func (mw *GinJWTMiddleware) MiddlewareInit() error {
 
 	if mw.Unauthorized == nil {
 		mw.Unauthorized = func(c *gin.Context, code int, message string) {
-			c.JSON(code, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"status": code,
 				"msg":    message,
 			})
